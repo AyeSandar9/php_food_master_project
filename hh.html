@@ -1,0 +1,103 @@
+<?php 
+if(isset($_POST['submit']))
+{
+    //echo "H";
+
+     //1.Get all the values from our form
+   $id=$_POST['id'] ;
+   $title=$_POST['title'];
+
+    $description=$_POST['description'];
+       $price=$_POST['price'];
+      $current_image=$_POST['current_image'];
+       //$current_image=$_POST['image_name'];
+      $category=$_POST['category'];
+        $featured=$_POST['featured'];
+        $active=$_POST['active'];
+
+        //Check whether the image is selected or not
+    
+if(isset($_FILES['image']['name'])){
+//Get the Image Details
+    $image_name=$_FILES['image']['name'];
+
+    if($image_name!=""){
+       
+         $ext=end(explode('.',$image_name));
+ echo "h";
+         //Rename the Image
+            $image_name="Food-Name-".rand(000,999).'.'.$ext;//e.g.Food_Category_834.jpg
+
+            $source_path=$_FILES['image']['tmp_name'];
+
+            $destination_path="../images/food/".$image_name;
+
+            //Finally Upload the image
+            $upload=move_uploaded_file($source_path,$destination_path);
+
+            //Check whether the image is uploaded or not
+            //And if the image is not uploaded then we will stoop the process and redirect with error message
+            if($upload==false){
+                //Set message
+                $_SESSION['upload']="<div class='error'>Failed to Upload Image.</div>";
+
+                //Redirect to Add Category Page
+                header('location:'.SITEURL.'admin/manage-food.php');
+                //Stop the process
+                die();
+            }
+
+            if($current_image!=""){
+                $remove_path="../images/food/".$current_image;
+        $remove=unlink($remove_path);
+
+
+ if($remove==false){
+            //Failed to remove image
+            $_SESSION['failed-remove']="<div class='error'>Failed to remove current Image.</div>";
+            header('location:'.SITEURL.'admin/manage-food.php');
+            die();//Stop the Process
+
+        }
+
+
+            }
+
+    
+
+}else{
+    $image_name=$current_image;
+}}else{
+    $image_name=$current_image;
+   }
+
+//3.Update the database
+  $sql3="UPDATE tbl_food SET
+  title='$title',
+  description='$description',
+  price='$price',
+  image_name='$image_name',
+  category_id='$category',
+  featured='$featured',
+  active='$active'
+  WHERE id=$id
+  ";
+
+  //Execute the Query
+  $res3=mysqli_query($conn,$sql3);
+
+
+
+    //4.Redirect to Manage Category with message
+  //Check whether executed or not
+  if($res3==true) {
+   //Category Updated
+   $_SESSION['update']="<div class='success'>Food Updated Successfully.</div>";
+   header('location:'.SITEURL.'admin/manage-food.php');
+  }else{
+    $_SESSION['update']="<div class='error'>Failed to Update Food.</div>";
+   header('location:'.SITEURL.'admin/manage-food.php');
+  }
+
+}
+?>
